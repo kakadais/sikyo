@@ -1,0 +1,16 @@
+@import "tailwindcss" source("../");
+
+/* 앱 기본 배경/타이포(모바일) */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100;
+}
+
+/* iOS 탭 하이라이트 제거 느낌 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

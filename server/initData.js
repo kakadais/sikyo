@@ -1,0 +1,72 @@
+import { faker } from "@faker-js/faker";
+import { Shops } from "/imports/api/shops";
+import { Menus } from "/imports/api/menus";
+
+const CAFE_SHOPS = [
+  { name: "스타벅스", menus: ["아메리카노", "카페라떼", "바닐라라떼", "콜드브루", "카푸치노", "디카페인 아메리카노", "자몽허니블랙티", "초코라떼"] },
+  { name: "이디야", menus: ["아메리카노", "카페라떼", "바닐라라떼", "연유라떼", "콜드브루", "복숭아 아이스티", "레몬에이드", "딸기라떼"] },
+  { name: "투썸플레이스", menus: ["아메리카노", "카페라떼", "바닐라라떼", "콜드브루", "아이스티", "레몬에이드", "카페모카"] },
+];
+
+const LUNCH_SHOPS = [
+  { name: "김밥천국", menus: ["야채김밥", "참치김밥", "라면", "떡라면", "돈까스", "제육덮밥", "김치볶음밥", "오므라이스", "우동"] },
+  { name: "한솥", menus: ["치킨마요", "돈치마요", "제육볶음 도시락", "고기고기 도시락", "카레 도시락", "불고기 도시락", "스테이크 도시락"] },
+  { name: "홍콩반점", menus: ["짜장면", "짬뽕", "볶음밥", "탕수육(소)", "탕수육(중)", "군만두", "고추짜장"] },
+  { name: "역전우동", menus: ["우동", "어묵우동", "냉우동", "김치우동", "돈까스", "카레라이스", "튀김우동"] },
+  { name: "본죽", menus: ["전복죽", "쇠고기야채죽", "호박죽", "삼계죽", "참치야채죽"] },
+];
+
+const FASTFOOD_SHOPS = [
+  { name: "맥도날드", menus: ["빅맥", "맥스파이시 상하이 버거", "치즈버거", "더블치즈버거", "감자튀김", "코카콜라", "제로콜라"] },
+  { name: "맘스터치", menus: ["싸이버거", "화이트갈릭버거", "치킨텐더", "감자튀김", "콜라", "치즈스틱"] },
+  { name: "버거킹", menus: ["와퍼", "치즈와퍼", "불고기버거", "롱치킨버거", "감자튀김", "코카콜라", "어니언링"] },
+  { name: "서브웨이", menus: ["이탈리안 B.M.T", "터키", "스테이크&치즈", "치킨 데리야끼", "에그마요", "쿠키", "콜라"] },
+];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+export async function initData() {
+  const now = new Date();
+
+  // 전부 삭제
+  await Menus.removeAsync({});
+  await Shops.removeAsync({});
+
+  // 카테고리별로 적당히 섞어서 7~10개 정도 생성
+  const pool = shuffle([
+    ...CAFE_SHOPS.map((x) => ({ ...x, kind: "카페" })),
+    ...LUNCH_SHOPS.map((x) => ({ ...x, kind: "점심" })),
+    ...FASTFOOD_SHOPS.map((x) => ({ ...x, kind: "패스트푸드" })),
+  ]);
+
+  const targetCount = faker.number.int({ min: 7, max: 10 });
+  const picked = pool.slice(0, targetCount);
+
+  for (const shopSeed of picked) {
+    const shopId = await Shops.insertAsync({
+      name: shopSeed.name,
+      kind: shopSeed.kind, // UI에 쓰고 싶으면 나중에 활용 가능 (지금은 표시 안 함)
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    // 메뉴는 6~10개 정도
+    const menus = shuffle(shopSeed.menus).slice(0, faker.number.int({ min: 6, max: Math.min(10, shopSeed.menus.length) }));
+
+    for (const menuName of menus) {
+      await Menus.insertAsync({
+        shopId,
+        name: menuName,
+        count: 0,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+  }
+
+  const shopRows = await Shops.find().countAsync();
+  const menuRows = await Menus.find().countAsync();
+  console.log(`[sikyo] initData done. shops=${shopRows} menus=${menuRows}`);
+}
