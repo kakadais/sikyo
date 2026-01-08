@@ -9,7 +9,7 @@ export default function TopBar({
                                }) {
   return (
     <div className={`sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-gray-100 dark:bg-gray-900/70 dark:border-white/10 ${className}`}>
-      <div className="mx-auto max-w-xl px-4">
+      <div className="mx-auto max-w-xl lg:max-w-3xl xl:max-w-4xl px-4 lg:px-8">
         <div className="h-14 flex items-center justify-between gap-x-3">
           <div className="flex items-center gap-x-2 min-w-0">
             {onBack ? (

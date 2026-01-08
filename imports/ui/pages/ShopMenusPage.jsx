@@ -185,7 +185,7 @@ export default function ShopMenusPage() {
 
 
   return (
-    <div className="mx-auto max-w-xl">
+    <div className="mx-auto max-w-xl lg:max-w-3xl xl:max-w-4xl">
       <TopBar
         title={title}
         onBack={() => navigate("/")}
@@ -202,7 +202,7 @@ export default function ShopMenusPage() {
         }
       />
 
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 lg:px-8">
         <div className="text-sm text-gray-500 dark:text-gray-400">
           메뉴 목록
         </div>
@@ -271,26 +271,36 @@ export default function ShopMenusPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-x-2">
-                        <button
-                          type="button"
-                          onClick={() => dec(menu._id)}
-                          className="size-10 rounded-full bg-white text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50
-                            dark:bg-white/10 dark:text-white dark:shadow-none dark:inset-ring-white/5 dark:hover:bg-white/20"
-                          aria-label="decrease"
-                        >
-                          −
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => inc(menu._id)}
-                          className="size-10 rounded-full bg-indigo-600 text-white shadow-xs hover:bg-indigo-500
-                            dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                          aria-label="increase"
-                        >
-                          +
-                        </button>
+                      <div className="flex flex-col items-center gap-y-1">
+                        {/* +/- buttons */}
+                        <div className="flex items-center gap-x-2">
+                          <button
+                            type="button"
+                            onClick={() => dec(menu._id)}
+                            className="size-10 rounded-full bg-white text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50
+        dark:bg-white/10 dark:text-white dark:shadow-none dark:inset-ring-white/5 dark:hover:bg-white/20"
+                            aria-label="decrease"
+                          >
+                            −
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => inc(menu._id)}
+                            className="size-10 rounded-full bg-indigo-600 text-white shadow-xs hover:bg-indigo-500
+        dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                            aria-label="increase"
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        {/* swipe hint */}
+                        <div className="text-[10px] leading-none text-gray-400 dark:text-gray-500">
+                          swipe
+                        </div>
                       </div>
+
                     </div>
                   </SwipeRow>
                 </li>

@@ -40,7 +40,7 @@ export default function ShopsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-xl">
+    <div className="mx-auto max-w-xl lg:max-w-3xl xl:max-w-4xl">
       <TopBar
         title="SIKYO"
         right={
@@ -52,7 +52,7 @@ export default function ShopsPage() {
         }
       />
 
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 lg:px-8">
         <div className="text-sm text-gray-500 dark:text-gray-400">
           음식점 목록
         </div>
@@ -114,7 +114,7 @@ export default function ShopsPage() {
                     </div>
 
                     <div className="text-xs font-semibold text-gray-400 dark:text-gray-500">
-                      스와이프
+                      스와이프 메뉴
                     </div>
                   </button>
                 </SwipeRow>
