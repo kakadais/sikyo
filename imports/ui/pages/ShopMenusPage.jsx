@@ -185,7 +185,7 @@ export default function ShopMenusPage() {
 
 
   return (
-    <div className="mx-auto max-w-xl lg:max-w-3xl xl:max-w-4xl">
+    <div>
       <TopBar
         title={title}
         onBack={() => navigate("/")}
@@ -193,137 +193,123 @@ export default function ShopMenusPage() {
           <button
             type="button"
             onClick={onShare}
-            className="inline-flex items-center justify-center rounded-full p-2 shadow-xs inset-ring inset-ring-gray-300 bg-white hover:bg-gray-50
-              dark:bg-white/10 dark:text-white dark:shadow-none dark:inset-ring-white/5 dark:hover:bg-white/20"
+            className="inline-flex items-center justify-center rounded-full p-2 bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition"
             aria-label="Share"
           >
-            <ShareIcon className="size-5 text-gray-900 dark:text-white" />
+            <ShareIcon className="size-5" />
           </button>
         }
       />
 
-      <div className="px-4 py-4 lg:px-8">
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          메뉴 목록
-        </div>
+      <div className="mt-8">
+        <ul role="list" className="grid grid-cols-1 gap-8">
+          {ready && menus.length === 0 ? (
+            <li className="py-12 text-center text-sm text-neutral-500">
+              No menus yet. Click the + button to add.
+            </li>
+          ) : null}
 
-        <div className="mt-3 overflow-hidden rounded-2xl bg-white inset-ring inset-ring-gray-200 dark:bg-gray-900 dark:inset-ring-white/10">
-          <ul role="list" className="divide-y divide-gray-100 dark:divide-white/10">
-            {ready && menus.length === 0 ? (
-              <li className="px-4 py-6 text-sm text-gray-500 dark:text-gray-400">
-                아직 메뉴가 없어요. 아래 버튼으로 추가해줘.
-              </li>
-            ) : null}
+          {menus.map((menu) => {
+            const c = menu.count || 0;
 
-            {menus.map((menu) => {
-              const c = menu.count || 0;
+            return (
+              <li key={menu._id} className="group relative border-t border-neutral-100 pt-6 transition hover:border-neutral-300">
+                <SwipeRow
+                  actionWidth={160}
+                  renderActions={({ close }) => (
+                    <div className="flex items-center gap-2 pl-4 h-full">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          close();
+                          openEdit(menu);
+                        }}
+                        className="rounded-full bg-neutral-100 px-4 py-2 text-xs font-bold text-neutral-900 hover:bg-neutral-200 transition"
+                      >
+                        Edit
+                      </button>
 
-              return (
-                <li key={menu._id} className="bg-white dark:bg-gray-900">
-                  <SwipeRow
-                    actionWidth={152}
-                    renderActions={({ close }) => (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            close();
-                            openEdit(menu);
-                          }}
-                          className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50
-                            dark:bg-white/10 dark:text-white dark:shadow-none dark:inset-ring-white/5 dark:hover:bg-white/20"
-                        >
-                          수정
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            close();
-                            const ok = window.confirm("메뉴를 삭제할까요?");
-                            if (!ok) return;
-                            removeMenu(menu._id);
-                          }}
-                          className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700 inset-ring inset-ring-red-600/20 hover:bg-red-100
-                            dark:bg-red-900/30 dark:text-red-400 dark:inset-ring-red-500/20 dark:hover:bg-red-900/40"
-                        >
-                          삭제
-                        </button>
-                      </>
-                    )}
-                  >
-                    <div className="px-4 py-4 flex items-center gap-x-3 hover:bg-gray-50 dark:hover:bg-white/5">
-                      <div className="w-10 shrink-0 text-center">
-                        <div className="text-lg font-semibold tabular-nums text-gray-900 dark:text-white">
-                          {c}
-                        </div>
-                        <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                          order
-                        </div>
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div
-                          className="font-semibold text-gray-900 dark:text-white leading-6"
-                          style={{ fontSize: "clamp(0.85rem, 3.6vw, 1rem)" }}
-                        >
-                          <span className="break-words">{menu.name}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-center gap-y-1">
-                        {/* +/- buttons */}
-                        <div className="flex items-center gap-x-2">
-                          <button
-                            type="button"
-                            onClick={() => dec(menu._id)}
-                            className="size-10 rounded-full bg-white text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50
-        dark:bg-white/10 dark:text-white dark:shadow-none dark:inset-ring-white/5 dark:hover:bg-white/20"
-                            aria-label="decrease"
-                          >
-                            −
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => inc(menu._id)}
-                            className="size-10 rounded-full bg-indigo-600 text-white shadow-xs hover:bg-indigo-500
-        dark:bg-indigo-500 dark:hover:bg-indigo-400"
-                            aria-label="increase"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        {/* swipe hint */}
-                        <div className="text-[10px] leading-none text-gray-400 dark:text-gray-500">
-                          swipe
-                        </div>
-                      </div>
-
+                      <button
+                        type="button"
+                        onClick={() => {
+                          close();
+                          const ok = window.confirm("Delete this menu?");
+                          if (!ok) return;
+                          removeMenu(menu._id);
+                        }}
+                        className="rounded-full bg-red-50 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-100 transition"
+                      >
+                        Delete
+                      </button>
                     </div>
-                  </SwipeRow>
-                </li>
-              );
-            })}
-          </ul>
+                  )}
+                >
+                  <div className="flex items-center gap-x-4">
+                    <div className="w-12 shrink-0 text-center">
+                      <div className="text-xl font-bold tabular-nums text-neutral-950 font-display">
+                        {c}
+                      </div>
+                      <div className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">
+                        Count
+                      </div>
+                    </div>
 
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-neutral-950 text-lg leading-tight break-words">
+                        {menu.name}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-y-1">
+                      <div className="flex items-center gap-x-3">
+                        <button
+                          type="button"
+                          onClick={() => dec(menu._id)}
+                          className="size-10 flex items-center justify-center rounded-full bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition text-xl font-medium"
+                          aria-label="decrease"
+                        >
+                          −
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => inc(menu._id)}
+                          className="size-10 flex items-center justify-center rounded-full bg-neutral-950 text-white hover:bg-neutral-800 transition text-xl font-medium"
+                          aria-label="increase"
+                        >
+                          +
+                        </button>
+                      </div>
+                      
+                      {/* swipe hint */}
+                      <div className="text-[10px] leading-none text-neutral-400 select-none">
+                        swipe
+                      </div>
+                    </div>
+
+                  </div>
+                </SwipeRow>
+              </li>
+            );
+          })}
+        </ul>
+
+        {/* Action Buttons */}
+        <div className="mt-12 space-y-4 border-t border-neutral-100 pt-8">
           <button
             type="button"
             onClick={openCreate}
-            className="flex w-full items-center justify-center px-3 py-3 text-sm font-semibold text-gray-900 hover:bg-gray-50 border-t border-gray-100
-              dark:text-white dark:hover:bg-white/5 dark:border-white/10"
+            className="w-full rounded-2xl bg-neutral-950 py-4 text-sm font-bold text-white hover:bg-neutral-800 transition"
           >
-            메뉴 추가
+            Add New Menu
           </button>
 
           <button
             type="button"
             onClick={resetCounts}
-            className="flex w-full items-center justify-center px-3 py-3 text-sm font-semibold text-red-700 hover:bg-red-50 border-t border-gray-100
-              dark:text-red-400 dark:hover:bg-red-900/20 dark:border-white/10"
+            className="w-full rounded-2xl bg-white py-4 text-sm font-bold text-red-600 border border-neutral-200 hover:bg-red-50 transition"
           >
-            수량 초기화
+            Reset All Counts
           </button>
         </div>
       </div>

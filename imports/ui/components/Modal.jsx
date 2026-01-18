@@ -29,11 +29,11 @@ export default function Modal({ open, onClose, title, children, showClose = true
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-2 sm:translate-y-0 sm:scale-95"
             >
-              <DialogPanel className="w-full max-w-md rounded-2xl bg-white shadow-xs inset-ring inset-ring-gray-200 dark:bg-gray-900 dark:inset-ring-white/10">
-                <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-white/10">
+              <DialogPanel className="w-full max-w-md rounded-[40px] bg-white shadow-xl inset-ring inset-ring-neutral-200">
+                <div className="px-6 pt-6 pb-4 border-b border-neutral-100">
                   <div className="flex items-center justify-between gap-x-3">
                     <div className="min-w-0">
-                      <div className="text-base font-semibold text-gray-900 dark:text-white truncate">
+                      <div className="text-xl font-display font-bold text-neutral-950 truncate">
                         {title}
                       </div>
                     </div>
@@ -41,16 +41,16 @@ export default function Modal({ open, onClose, title, children, showClose = true
                       <button
                         type="button"
                         onClick={onClose}
-                        className="rounded-full p-2 text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-white/5"
+                        className="rounded-full p-2 text-neutral-500 hover:bg-neutral-100 transition"
                         aria-label="Close"
                       >
-                        <XMarkIcon className="size-5" />
+                        <XMarkIcon className="size-6" />
                       </button>
                     ) : null}
                   </div>
                 </div>
 
-                <div className="px-4 py-4">{children}</div>
+                <div className="px-6 py-6 font-sans text-neutral-900">{children}</div>
               </DialogPanel>
             </TransitionChild>
           </div>

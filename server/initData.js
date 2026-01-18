@@ -52,8 +52,12 @@ export async function initData() {
       updatedAt: now,
     });
 
-    // 메뉴는 6~10개 정도
-    const menus = shuffle(shopSeed.menus).slice(0, faker.number.int({ min: 6, max: Math.min(10, shopSeed.menus.length) }));
+    // 메뉴는 6~10개 정도 (보유 메뉴가 적으면 그만큼만)
+    const maxCount = Math.min(10, shopSeed.menus.length);
+    const minCount = Math.min(6, maxCount);
+    const count = faker.number.int({ min: minCount, max: maxCount });
+    
+    const menus = shuffle(shopSeed.menus).slice(0, count);
 
     for (const menuName of menus) {
       await Menus.insertAsync({

@@ -54,7 +54,7 @@ export default function SwipeRow({
       <div {...handlers} className="relative z-0">
         <div
           ref={rowRef}
-          className="relative bg-white dark:bg-gray-900 transition-transform duration-200 will-change-transform"
+          className="relative bg-white transition-transform duration-200 will-change-transform"
           style={{ transform: `translateX(${translate}px)` }}
         >
           {children}

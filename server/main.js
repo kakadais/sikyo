@@ -7,6 +7,6 @@ import { initData } from "./initData";
 
 Meteor.startup(async () => {
   if (!Meteor.isProduction) {
-    //await initData();
+    // await initData();
   }
 });

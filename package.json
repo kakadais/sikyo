@@ -12,6 +12,8 @@
     "@faker-js/faker": "^9.3.1",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.1.5",
+    "@tailwindcss/postcss": "^4.1.0",
+    "chai": "^6.2.2",
     "meteor-node-stubs": "^1.2.5",
     "postcss": "^8.4.49",
     "postcss-load-config": "^5.1.0",
@@ -19,8 +21,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.26.2",
     "react-swipeable": "^7.0.1",
-    "tailwindcss": "^4.1.0",
-    "@tailwindcss/postcss": "^4.1.0"
+    "tailwindcss": "^4.1.0"
   },
   "meteor": {
     "mainModule": {
