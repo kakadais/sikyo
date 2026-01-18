@@ -8,20 +8,29 @@ import { Shops } from "/imports/api/shops";
 import TopBar, { IconButton, Icons } from "../components/TopBar.jsx";
 import SwipeRow from "../components/SwipeRow.jsx";
 import ShopEditModal from "../components/ShopEditModal.jsx";
+import Loading from "../components/Loading.jsx";
+import ErrorPage from "../pages/ErrorPage.jsx";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 
 export default function ShopsPage() {
   const navigate = useNavigate();
 
-  const { ready, shops } = useTracker(() => {
+  const { isLoading, shops, user } = useTracker(() => {
     const sub = Meteor.subscribe("shops.all");
     return {
-      ready: sub.ready(),
+      isLoading: !sub.ready(),
       shops: Shops.find({}, { sort: { updatedAt: -1 } }).fetch(),
+      user: Meteor.user(),
     };
   });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editShop, setEditShop] = useState(null);
+
+  if (isLoading) return <Loading />;
+  // shops.all subscribe doesn't easily return error unless captured, 
+  // but typically Meteor retries. If we wanted precise error, we'd wrap subscribe.
+  // For now, simplicity.
 
   const openCreate = () => {
     setEditShop(null);
@@ -38,28 +47,51 @@ export default function ShopsPage() {
       if (err) alert(err.reason || err.message);
     });
   };
+  
+  const handleLogout = () => {
+    Meteor.logout(() => {
+        navigate("/");
+    });
+  };
 
   return (
     <div className="mx-auto max-w-xl lg:max-w-3xl xl:max-w-4xl">
       <TopBar
         title="SIKYO"
         right={
-          <IconButton
-            label="Add shop"
-            icon={Icons.PlusIcon}
-            onClick={openCreate}
-          />
+            <div className="flex items-center gap-x-2">
+                <IconButton
+                    label="Add shop"
+                    icon={Icons.PlusIcon}
+                    onClick={openCreate}
+                />
+                {user && (
+                    <IconButton
+                        label="Logout"
+                        icon={ArrowRightStartOnRectangleIcon}
+                        onClick={handleLogout}
+                    />
+                )}
+                {!user && (
+                    <button 
+                        onClick={() => navigate("/")}
+                        className="text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                    >
+                        로그인
+                    </button>
+                )}
+            </div>
         }
       />
 
       <div className="px-4 py-4 lg:px-8">
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          음식점 목록
+          {user ? `${user.username}님의 음식점` : "공개 음식점 목록"}
         </div>
 
         <div className="mt-3 overflow-hidden rounded-2xl bg-white inset-ring inset-ring-gray-200 dark:bg-gray-900 dark:inset-ring-white/10">
           <ul role="list" className="divide-y divide-gray-100 dark:divide-white/10">
-            {ready && shops.length === 0 ? (
+            {shops.length === 0 ? (
               <li className="px-4 py-6 text-sm text-gray-500 dark:text-gray-400">
                 아직 음식점이 없어요. 우측 상단 + 로 추가해줘.
               </li>

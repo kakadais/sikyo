@@ -9,6 +9,8 @@ import { Menus } from "/imports/api/menus";
 import TopBar from "../components/TopBar.jsx";
 import SwipeRow from "../components/SwipeRow.jsx";
 import MenuEditModal from "../components/MenuEditModal.jsx";
+import Loading from "../components/Loading.jsx";
+import ErrorPage from "../pages/ErrorPage.jsx";
 
 import { ShareIcon } from "@heroicons/react/24/outline";
 
@@ -92,13 +94,16 @@ export default function ShopMenusPage() {
   const navigate = useNavigate();
   const { shopId } = useParams();
 
-  const { ready, shop, menus } = useTracker(() => {
+  const { isLoading, shop, menus, shopExists } = useTracker(() => {
     const subShop = Meteor.subscribe("shops.all");
     const subMenus = Meteor.subscribe("menus.byShop", shopId);
+    
+    const s = Shops.findOne({ _id: shopId });
 
     return {
-      ready: subShop.ready() && subMenus.ready(),
-      shop: Shops.findOne({ _id: shopId }),
+      isLoading: !subShop.ready() || !subMenus.ready(),
+      shop: s,
+      shopExists: !!s,
       // 메뉴는 createdAt 정렬 권장
       menus: Menus.find({ shopId }, { sort: { createdAt: -1 } }).fetch(),
     };
@@ -106,6 +111,17 @@ export default function ShopMenusPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editMenu, setEditMenu] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const title = shop?.name || "메뉴";
+
+  const currentUrl = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    return window.location.href;
+  }, []);
+
+  if (isLoading) return <Loading />;
+  if (!shopExists) return <ErrorPage message="Shop not found or access denied." />;
 
   const openCreate = () => {
     setEditMenu(null);
@@ -144,14 +160,6 @@ export default function ShopMenusPage() {
     });
   };
 
-  const title = shop?.name || "메뉴";
-
-  const currentUrl = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return window.location.href;
-  }, []);
-
-  const [shareOpen, setShareOpen] = useState(false);
 
   const onShare = async () => {
     const url = currentUrl;
@@ -209,7 +217,7 @@ export default function ShopMenusPage() {
 
         <div className="mt-3 overflow-hidden rounded-2xl bg-white inset-ring inset-ring-gray-200 dark:bg-gray-900 dark:inset-ring-white/10">
           <ul role="list" className="divide-y divide-gray-100 dark:divide-white/10">
-            {ready && menus.length === 0 ? (
+            {menus.length === 0 ? (
               <li className="px-4 py-6 text-sm text-gray-500 dark:text-gray-400">
                 아직 메뉴가 없어요. 아래 버튼으로 추가해줘.
               </li>

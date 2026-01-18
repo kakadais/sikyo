@@ -27,12 +27,12 @@ function shuffle(arr) {
   return [...arr].sort(() => Math.random() - 0.5);
 }
 
-export async function initData() {
+/**
+ * 특정 유저(또는 게스트)를 위한 초기 데이터를 생성합니다.
+ * @param {string|null} userId - 생성할 데이터의 소유자 ID. null이면 공개(게스트) 데이터.
+ */
+export async function seedUserData(userId = null) {
   const now = new Date();
-
-  // 전부 삭제
-  await Menus.removeAsync({});
-  await Shops.removeAsync({});
 
   // 카테고리별로 적당히 섞어서 7~10개 정도 생성
   const pool = shuffle([
@@ -45,26 +45,61 @@ export async function initData() {
   const picked = pool.slice(0, targetCount);
 
   for (const shopSeed of picked) {
-    const shopId = await Shops.insertAsync({
+    const shopData = {
       name: shopSeed.name,
-      kind: shopSeed.kind, // UI에 쓰고 싶으면 나중에 활용 가능 (지금은 표시 안 함)
+      kind: shopSeed.kind, 
       createdAt: now,
       updatedAt: now,
-    });
+    };
+    
+    if (userId) {
+      shopData.userId = userId;
+    }
 
-    // 메뉴는 6~10개 정도
-    const menus = shuffle(shopSeed.menus).slice(0, faker.number.int({ min: 6, max: Math.min(10, shopSeed.menus.length) }));
+    const shopId = await Shops.insertAsync(shopData);
+
+    // 메뉴는 3~10개 정도 (보유 메뉴 수에 따라 조정)
+    const maxCount = Math.min(10, shopSeed.menus.length);
+    const minCount = Math.min(3, maxCount);
+    const count = faker.number.int({ min: minCount, max: maxCount });
+    
+    const menus = shuffle(shopSeed.menus).slice(0, count);
 
     for (const menuName of menus) {
-      await Menus.insertAsync({
-        shopId,
-        name: menuName,
-        count: 0,
-        createdAt: now,
-        updatedAt: now,
-      });
+        const menuData = {
+            shopId,
+            name: menuName,
+            count: 0,
+            createdAt: now,
+            updatedAt: now,
+        }
+        if (userId) {
+            menuData.userId = userId;
+        }
+      await Menus.insertAsync(menuData);
     }
   }
+}
+
+/**
+ * 서버 시작 시 호출되는 초기화 함수.
+ * userId가 주어지지 않으면 전체 초기화 후 게스트 데이터를 생성합니다.
+ * @param {string|null} userId 
+ */
+export async function initData(userId = null) {
+  // userId가 명시되면 해당 유저 데이터만 생성 (기존 데이터 삭제 X)
+  if (userId) {
+    console.log(`[sikyo] Seeding data for user: ${userId}`);
+    await seedUserData(userId);
+    return;
+  }
+
+  // userId가 없으면 전체 초기화 (기존 동작 유지)
+  console.log(`[sikyo] Clearing all data and seeding guest data...`);
+  await Menus.removeAsync({});
+  await Shops.removeAsync({});
+
+  await seedUserData(null); // 게스트 데이터 생성
 
   const shopRows = await Shops.find().countAsync();
   const menuRows = await Menus.find().countAsync();

@@ -10,17 +10,45 @@ function cleanName(name) {
   return v;
 }
 
+/**
+ * Checks if the current user can edit the shop.
+ * @param {string} shopId
+ * @param {string|null} userId
+ * @returns {Promise<Object>} The shop document
+ */
+async function checkShopOwnership(shopId, userId) {
+  const shop = await Shops.findOneAsync({ _id: shopId });
+  if (!shop) throw new Meteor.Error("not-found", "Shop not found");
+
+  // Private shop: must match owner
+  if (shop.userId) {
+    if (shop.userId !== userId) {
+      throw new Meteor.Error("not-authorized", "You do not own this shop");
+    }
+  } 
+  // Public shop: anyone can edit (Guest mode)
+  
+  return shop;
+}
+
 Meteor.methods({
   async "shops.insert"(name) {
     check(name, String);
     const n = cleanName(name);
     const now = new Date();
 
-    return await Shops.insertAsync({
+    const doc = {
       name: n,
       createdAt: now,
       updatedAt: now,
-    });
+    };
+    
+    // Logged in user -> Private shop
+    if (this.userId) {
+      doc.userId = this.userId;
+    }
+
+    return await Shops.insertAsync(doc);
   },
 
   async "shops.updateName"(shopId, name) {
@@ -29,21 +57,23 @@ Meteor.methods({
     const n = cleanName(name);
     const now = new Date();
 
+    await checkShopOwnership(shopId, this.userId);
+
     const updated = await Shops.updateAsync(
       { _id: shopId },
       { $set: { name: n, updatedAt: now } }
     );
-    if (!updated) throw new Meteor.Error("not-found", "Shop not found");
     return true;
   },
 
   async "shops.remove"(shopId) {
     check(shopId, String);
 
+    await checkShopOwnership(shopId, this.userId);
+
     await Menus.removeAsync({ shopId });
 
-    const removed = await Shops.removeAsync({ _id: shopId });
-    if (!removed) throw new Meteor.Error("not-found", "Shop not found");
+    await Shops.removeAsync({ _id: shopId });
     return true;
   },
 
@@ -53,8 +83,7 @@ Meteor.methods({
     const n = cleanName(name);
     const now = new Date();
 
-    const shop = await Shops.findOneAsync({ _id: shopId });
-    if (!shop) throw new Meteor.Error("not-found", "Shop not found");
+    const shop = await checkShopOwnership(shopId, this.userId);
 
     const menuId = await Menus.insertAsync({
       shopId,
@@ -62,6 +91,10 @@ Meteor.methods({
       count: 0,
       createdAt: now,
       updatedAt: now,
+      // Menus don't strictly need userId if they are child of shop, 
+      // but adding it doesn't hurt for consistency or direct queries.
+      // However, we rely on Shop ownership.
+      userId: shop.userId, 
     });
 
     // 메뉴 추가는 상위 Shop도 updatedAt 갱신(목록 정렬에 반영)
@@ -78,6 +111,9 @@ Meteor.methods({
 
     const menu = await Menus.findOneAsync({ _id: menuId });
     if (!menu) throw new Meteor.Error("not-found", "Menu not found");
+    
+    // Check shop ownership via parent
+    await checkShopOwnership(menu.shopId, this.userId);
 
     const updated = await Menus.updateAsync(
       { _id: menuId },
@@ -96,6 +132,8 @@ Meteor.methods({
 
     const menu = await Menus.findOneAsync({ _id: menuId });
     if (!menu) throw new Meteor.Error("not-found", "Menu not found");
+
+    await checkShopOwnership(menu.shopId, this.userId);
 
     const removed = await Menus.removeAsync({ _id: menuId });
     if (!removed) throw new Meteor.Error("not-found", "Menu not found");
@@ -119,6 +157,8 @@ Meteor.methods({
     const menu = await Menus.findOneAsync({ _id: menuId });
     if (!menu) throw new Meteor.Error("not-found", "Menu not found");
 
+    await checkShopOwnership(menu.shopId, this.userId);
+
     const next = Math.max(0, Math.min(999, (menu.count || 0) + d));
     const now = new Date();
 
@@ -136,6 +176,8 @@ Meteor.methods({
   async "menus.resetCountsByShop"(shopId) {
     check(shopId, String);
     const now = new Date();
+
+    await checkShopOwnership(shopId, this.userId);
 
     await Menus.updateAsync(
       { shopId },
