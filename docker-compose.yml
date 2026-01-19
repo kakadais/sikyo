@@ -1,0 +1,18 @@
+services:
+  app:
+    # CHANGE 1: Build from the current directory instead of pulling a non-existent image
+    build: . 
+    image: sikyo-app:latest
+    container_name: sikyo
+    restart: always
+    environment:
+      - PORT=3000
+      - ROOT_URL=${ROOT_URL:-http://localhost:3000}
+      # CHANGE 2: Default to host.docker.internal for local testing if not set
+      - MONGO_URL=${MONGO_URL:-mongodb://host.docker.internal:27017/sikyo}
+      # - MONGO_OPLOG_URL=${MONGO_OPLOG_URL:-mongodb://host.docker.internal:27017/local}
+    ports:
+      - "${PORT:-3000}:3000"
+    # Create an extra host alias so Linux/Mac works the same
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

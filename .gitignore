@@ -5,3 +5,4 @@ node_modules/
 build.sh
 pm2.sh
 start.sh
+.env

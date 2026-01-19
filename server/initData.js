@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Shops } from "/imports/api/shops";
 import { Menus } from "/imports/api/menus";
+import { Accounts } from 'meteor/accounts-base';
 
 const CAFE_SHOPS = [
   { name: "스타벅스", menus: ["아메리카노", "카페라떼", "바닐라라떼", "콜드브루", "카푸치노", "디카페인 아메리카노", "자몽허니블랙티", "초코라떼"] },
@@ -28,6 +29,18 @@ function shuffle(arr) {
 }
 
 export async function initData() {
+  const adminUser = await Accounts.findUserByUsername('admin');
+  if (adminUser) {
+    console.log('[sikyo] Admin user exists, skipping initData.');
+    return;
+  }
+
+  console.log('[sikyo] Admin user not found. Creating default admin and seeding data...');
+  await Accounts.createUserAsync({
+    username: 'admin',
+    password: 'mStartup!24',
+  });
+
   const now = new Date();
 
   // 전부 삭제
