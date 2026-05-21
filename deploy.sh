@@ -12,7 +12,7 @@ REMOTE_DEPLOY_BASE="~/deploy"          # remote deploy base path
 
 # build/release
 BUILD_ARCH="os.linux.x86_64"
-KEEP_RELEASES=5
+KEEP_RELEASES=3
 LOCAL_BUILD_ROOT="./.meteor/build"      # project-local build output root
 
 # pm2/runtime
